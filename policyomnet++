@@ -1,0 +1,39 @@
+case 16:
+{
+    // Using Q-Table
+    int d = this->lastDensity;
+    if (d > 50) // 50 is the max density value in the 300m table
+    {
+        d = 50;
+    }
+    int maxVal = -1;
+    int level = 0;
+    int index = 1;
+    double txP[] = {2, 4, 6, 8, 10, 12, 14, 16, 18, 20};
+
+    for (int i = 0; i < 10; i++)
+    {
+        if (pcbrFunc(d, txP[i]) >= this->lastCBR)
+        {
+            index = i;
+            break;
+        }
+    }
+    for (int i = 0; i < 10; i++)
+    {
+        if (this->qTable[d * 10 + index][i] > maxVal)
+        {
+            maxVal = this->qTable[d * 10 + index][i];
+            level = i;
+        }
+    }
+
+    mac->setTxPower(txP[level]);
+    this->txPowerUsed = txP[level];
+
+    std::ofstream receiverFile;
+    receiverFile.open(receiverFileName, std::ios::out | std::ios::app);
+    receiverFile << mobility->getExternalId() << '\t' << simTime() << '\t' << this->lastDensity << '\t' << this->lastCBR << '\t' << txPowerUsed << '\t' << this->lastTxPower << '\n';
+
+    break;
+}
